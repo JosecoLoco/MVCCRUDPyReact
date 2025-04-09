@@ -3,17 +3,16 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from bson import ObjectId
 
-
+#Mongo
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost/flaskreactcrud'
 mongo = PyMongo(app)
-
-
+#Cors
 CORS(app)
 
-db = mongo.db.pythonreact
+db = mongo.db.pythonreact 
 
-
+#Routas
 @app.route('/users', methods=['POST'])
 def createUser():
     print(request.json)
@@ -51,26 +50,7 @@ def getUser(id):
     else:
         return jsonify({'error': 'User not found'}), 404  
 
-@app.route('/users/<id>', methods=['DELETE'])
-def deleteUser(id):
-    result = db.delete_one({'_id': ObjectId(id)})
-    if result.deleted_count > 0:
-        return jsonify({'message': 'User Deleted'})
-    else:
-        return jsonify({'error': 'User not found'}), 404
 
-@app.route('/users/<id>', methods=['PUT'])
-def updateUser(id):
-    print(request.json)
-    result = db.update_one({'_id': ObjectId(id)}, {"$set": {
-        'name': request.json['name'],
-        'email': request.json['email'],
-        'password': request.json['password']
-    }})
-    if result.matched_count > 0:
-        return jsonify({'message': 'User Updated'})
-    else:
-        return jsonify({'error': 'User not found'}), 404
 
 
 
