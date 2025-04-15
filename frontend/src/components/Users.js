@@ -11,9 +11,14 @@ export const Users = ({ user: userLogged }) => {
   const [editing, setEditing] = useState(false);
   const [id, setId] = useState("");
 
+  const [memeUrl, setMemeUrl] = useState(null); // Para el meme
+
   const nameInput = useRef(null);
 
   let [users, setUsers] = useState([]);
+
+  // Saludo personalizado
+  const saludo = `Hola ${userLogged.name}, aquí tienes usuarios y memes aleatorios!!`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,8 +101,18 @@ export const Users = ({ user: userLogged }) => {
     nameInput.current.focus();
   };
 
+  const getMeme = async () => {
+    const res = await fetch("https://meme-api.com/gimme");
+    const data = await res.json();
+    setMemeUrl(data.url);
+  };
+
   useEffect(() => {
     getUsers();
+    if (userLogged.role === "cliente") {
+      getMeme();
+    }
+
   }, []);
 
   return (
@@ -152,6 +167,13 @@ export const Users = ({ user: userLogged }) => {
             </button>
           </form>
         )}
+        {/* Si es cliente, muestra el meme */}
+        {userLogged.role === "cliente" && memeUrl && (
+          <div className="card mt-3">
+            <h5 className="card-title text-center mt-2">¡Meme aleatorio!</h5>
+            <img src={memeUrl} alt="Meme" className="img-fluid" style={{ maxHeight: 300, objectFit: "contain" }} />
+          </div>
+        )}
       </div>
       <div className="col-md-8">
         <table className="table table-striped">
@@ -169,7 +191,11 @@ export const Users = ({ user: userLogged }) => {
               <tr key={user._id}>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
-                <td>{user.password}</td>
+                <td>
+                  {user.role === "admin"
+                    ? "••••••••"
+                    : user.password}
+                </td>
                 <td>{user.role}</td>
                 {userLogged.role === "admin" && (
                   <td>
