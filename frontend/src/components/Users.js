@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 
 const API = process.env.REACT_APP_API;
 
-export const Users = () => {
+export const Users = ({ user: userLogged }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("cliente");
 
   const [editing, setEditing] = useState(false);
   const [id, setId] = useState("");
@@ -17,32 +18,37 @@ export const Users = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!editing) {
-      const res = await fetch(`${API}/users`, {
+      await fetch(`${API}/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Role": userLogged.role,
+          "Email": userLogged.email,
+          "Password": userLogged.password,
         },
         body: JSON.stringify({
           name,
           email,
           password,
+          role,
         }),
       });
-      await res.json();
     } else {
-      const res = await fetch(`${API}/users/${id}`, {
+      await fetch(`${API}/users/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Role": userLogged.role,
+          "Email": userLogged.email,
+          "Password": userLogged.password,
         },
         body: JSON.stringify({
           name,
           email,
           password,
+          role,
         }),
       });
-      const data = await res.json();
-      console.log(data);
       setEditing(false);
       setId("");
     }
@@ -51,6 +57,7 @@ export const Users = () => {
     setName("");
     setEmail("");
     setPassword("");
+    setRole("cliente");
     nameInput.current.focus();
   };
 
@@ -61,13 +68,16 @@ export const Users = () => {
   };
 
   const deleteUser = async (id) => {
-    const userResponse = window.confirm("Are you sure you want to delete it?");
+    const userResponse = window.confirm("¿Seguro que quieres eliminarlo?");
     if (userResponse) {
-      const res = await fetch(`${API}/users/${id}`, {
+      await fetch(`${API}/users/${id}`, {
         method: "DELETE",
+        headers: {
+          "Role": userLogged.role,
+          "Email": userLogged.email,
+          "Password": userLogged.password,
+        },
       });
-      const data = await res.json();
-      console.log(data);
       await getUsers();
     }
   };
@@ -79,10 +89,10 @@ export const Users = () => {
     setEditing(true);
     setId(id);
 
-    // Reset
     setName(data.name);
     setEmail(data.email);
     setPassword(data.password);
+    setRole(data.role || "cliente");
     nameInput.current.focus();
   };
 
@@ -93,49 +103,65 @@ export const Users = () => {
   return (
     <div className="row">
       <div className="col-md-4">
-        <form onSubmit={handleSubmit} className="card card-body">
-          <div className="form-group">
-            <input
-              type="text"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              className="form-control"
-              placeholder="Name"
-              ref={nameInput}
-              autoFocus
-            />
-          </div>
-          <div className="form-group">
-            <input
-              type="email"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              className="form-control"
-              placeholder="User's Email"
-            />
-          </div>
-          <div className="form-group">
-            <input
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              className="form-control"
-              placeholder="User's Password"
-            />
-          </div>
-          <button className="btn btn-primary btn-block">
-            {editing ? "Update" : "Create"}
-          </button>
-        </form>
+        {userLogged.role === "admin" && (
+          <form onSubmit={handleSubmit} className="card card-body">
+            <div className="form-group">
+              <input
+                type="text"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                className="form-control"
+                placeholder="Nombre"
+                ref={nameInput}
+                autoFocus
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="email"
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                className="form-control"
+                placeholder="Email"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                className="form-control"
+                placeholder="Contraseña"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <select
+                className="form-control"
+                value={role}
+                onChange={e => setRole(e.target.value)}
+              >
+                <option value="cliente">Cliente</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button className="btn btn-primary btn-block">
+              {editing ? "Actualizar" : "Crear"}
+            </button>
+          </form>
+        )}
       </div>
-      <div className="col-md-6">
+      <div className="col-md-8">
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>Nombre</th>
               <th>Email</th>
-              <th>Password</th>
-              <th>Operations</th>
+              <th>Contraseña</th>
+              <th>Rol</th>
+              {userLogged.role === "admin" && <th>Operaciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -144,20 +170,23 @@ export const Users = () => {
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.password}</td>
-                <td>
-                  <button
-                    className="btn btn-secondary btn-sm btn-block"
-                    onClick={(e) => editUser(user._id)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm btn-block"
-                    onClick={(e) => deleteUser(user._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                <td>{user.role}</td>
+                {userLogged.role === "admin" && (
+                  <td>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => editUser(user._id)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => deleteUser(user._id)}
+                    >
+                      Borrar
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
