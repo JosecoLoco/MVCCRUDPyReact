@@ -116,108 +116,111 @@ export const Users = ({ user: userLogged }) => {
   }, []);
 
   return (
-    <div className="row">
-      <div className="col-md-4">
-        {userLogged.role === "admin" && (
-          <form onSubmit={handleSubmit} className="card card-body">
-            <div className="form-group">
-              <input
-                type="text"
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                className="form-control"
-                placeholder="Nombre"
-                ref={nameInput}
-                autoFocus
-                required
-              />
+    <>
+      <h2 className="mb-4 text-center">{saludo}</h2>
+      <div className="row">
+        <div className="col-md-4">
+          {userLogged.role === "admin" && (
+            <form onSubmit={handleSubmit} className="card card-body">
+              <div className="form-group">
+                <input
+                  type="text"
+                  onChange={(e) => setName(e.target.value)}
+                  value={name}
+                  className="form-control"
+                  placeholder="Nombre"
+                  ref={nameInput}
+                  autoFocus
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="email"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  className="form-control"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  className="form-control"
+                  placeholder="Contraseña"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <select
+                  className="form-control"
+                  value={role}
+                  onChange={e => setRole(e.target.value)}
+                >
+                  <option value="cliente">Cliente</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <button className="btn btn-primary btn-block">
+                {editing ? "Actualizar" : "Crear"}
+              </button>
+            </form>
+          )}
+          {/* Si es cliente, muestra el meme */}
+          {userLogged.role === "cliente" && memeUrl && (
+            <div className="card mt-3">
+              <h5 className="card-title text-center mt-2">¡Meme aleatorio!</h5>
+              <img src={memeUrl} alt="Meme" className="img-fluid" style={{ maxHeight: 300, objectFit: "contain" }} />
             </div>
-            <div className="form-group">
-              <input
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-                className="form-control"
-                placeholder="Email"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <input
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
-                className="form-control"
-                placeholder="Contraseña"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <select
-                className="form-control"
-                value={role}
-                onChange={e => setRole(e.target.value)}
-              >
-                <option value="cliente">Cliente</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <button className="btn btn-primary btn-block">
-              {editing ? "Actualizar" : "Crear"}
-            </button>
-          </form>
-        )}
-        {/* Si es cliente, muestra el meme */}
-        {userLogged.role === "cliente" && memeUrl && (
-          <div className="card mt-3">
-            <h5 className="card-title text-center mt-2">¡Meme aleatorio!</h5>
-            <img src={memeUrl} alt="Meme" className="img-fluid" style={{ maxHeight: 300, objectFit: "contain" }} />
-          </div>
-        )}
-      </div>
-      <div className="col-md-8">
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Contraseña</th>
-              <th>Rol</th>
-              {userLogged.role === "admin" && <th>Operaciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>
-                  {user.role === "admin"
-                    ? "••••••••"
-                    : user.password}
-                </td>
-                <td>{user.role}</td>
-                {userLogged.role === "admin" && (
-                  <td>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => editUser(user._id)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => deleteUser(user._id)}
-                    >
-                      Borrar
-                    </button>
-                  </td>
-                )}
+          )}
+        </div>
+        <div className="col-md-8">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Contraseña</th>
+                <th>Rol</th>
+                {userLogged.role === "admin" && <th>Operaciones</th>}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>
+                    {user.role === "admin"
+                      ? "••••••••"
+                      : user.password}
+                  </td>
+                  <td>{user.role}</td>
+                  {userLogged.role === "admin" && (
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => editUser(user._id)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => deleteUser(user._id)}
+                      >
+                        Borrar
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
