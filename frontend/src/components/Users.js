@@ -172,7 +172,7 @@ export const Users = ({ user: userLogged }) => {
           {/* Si es cliente, muestra el meme */}
           {userLogged.role === "cliente" && memeUrl && (
             <div className="card mt-3">
-              <h5 className="card-title text-center mt-2">¡Meme aleatorio!</h5>
+              <h5 className="card-title text-center mt-2">¡Aquí tienes tu MEME!</h5>
               <img src={memeUrl} alt="Meme" className="img-fluid" style={{ maxHeight: 300, objectFit: "contain" }} />
             </div>
           )}
